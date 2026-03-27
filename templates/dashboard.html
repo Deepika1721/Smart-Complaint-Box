@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="container">
+    <h2>Admin Dashboard</h2>
+
+    <h3>Total Complaints: {{ count }}</h3>
+
+    <form action="/search" method="post">
+        <input type="text" name="keyword" placeholder="Search">
+        <button type="submit">Search</button>
+    </form>
+
+    <table border="1">
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Complaint</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th>Action</th>
+        </tr>
+
+        {% for item in data %}
+        <tr>
+            <td>{{ item[0] }}</td>
+            <td>{{ item[1] }}</td>
+            <td>{{ item[2] }}</td>
+            <td>{{ item[3] }}</td>
+            <td>{{ item[4] }}</td>
+            <td>
+                <form action="/update/{{ item[0] }}" method="post">
+                    <select name="status">
+                        <option>Pending</option>
+                        <option>In Progress</option>
+                        <option>Resolved</option>
+                    </select>
+                    <button type="submit">Update</button>
+                </form>
+                <a href="/delete/{{ item[0] }}">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <br>
+    <a href="/logout">Logout</a>
+</div>
+
+</body>
+</html>
