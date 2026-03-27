@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, session
-import sqlite3
+import psycopg2
+import os
 
 app = Flask(__name__)
 app.secret_key = "mysecretkey"
@@ -7,13 +8,19 @@ app.secret_key = "mysecretkey"
 ADMIN_USERNAME = "Deepika"
 ADMIN_PASSWORD = "1709"
 
-# DB create
+# DB connection
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+def get_connection():
+    return psycopg2.connect(DATABASE_URL)
+
+# Create table
 def init_db():
-    conn = sqlite3.connect("complaints.db")
-    c = conn.cursor()
-    c.execute("""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
         CREATE TABLE IF NOT EXISTS complaints (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             name TEXT,
             complaint TEXT
         )
@@ -27,18 +34,14 @@ init_db()
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-
-        if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
+        if request.form['username'] == ADMIN_USERNAME and request.form['password'] == ADMIN_PASSWORD:
             session['admin'] = True
             return redirect('/')
         else:
             return "Invalid Login"
-
     return render_template("login.html")
 
-# Home (Add complaint page)
+# Home
 @app.route('/')
 def home():
     if not session.get('admin'):
@@ -51,24 +54,24 @@ def add():
     name = request.form['name']
     complaint = request.form['complaint']
 
-    conn = sqlite3.connect("complaints.db")
-    c = conn.cursor()
-    c.execute("INSERT INTO complaints (name, complaint) VALUES (?, ?)", (name, complaint))
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("INSERT INTO complaints (name, complaint) VALUES (%s, %s)", (name, complaint))
     conn.commit()
     conn.close()
 
     return redirect('/')
 
-# Admin page (View complaints)
+# View complaints
 @app.route('/admin')
 def admin():
     if not session.get('admin'):
         return redirect('/login')
 
-    conn = sqlite3.connect("complaints.db")
-    c = conn.cursor()
-    c.execute("SELECT * FROM complaints")
-    data = c.fetchall()
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM complaints")
+    data = cur.fetchall()
     conn.close()
 
     return render_template("admin.html", complaints=data)
@@ -80,4 +83,4 @@ def logout():
     return redirect('/login')
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    app.run()
