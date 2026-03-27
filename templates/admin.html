@@ -1,24 +1,10 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Admin Login</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
+<h2>📊 Admin Dashboard</h2>
 
-<div class="container">
-    <h2>Admin Login</h2>
+<a href="/">Back</a> |
+<a href="/logout">Logout</a>
 
-    {% if error %}
-    <p style="color:red;">{{ error }}</p>
-    {% endif %}
+<h3>All Complaints</h3>
 
-    <form method="post">
-        <input type="text" name="username" placeholder="Username" required>
-        <input type="password" name="password" placeholder="Password" required>
-        <button type="submit">Login</button>
-    </form>
-</div>
-
-</body>
-</html>
+{% for c in complaints %}
+    <p><b>{{c[1]}}</b>: {{c[2]}}</p>
+{% endfor %}
