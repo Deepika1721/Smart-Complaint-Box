@@ -8,11 +8,14 @@ app.secret_key = "mysecretkey"
 ADMIN_USERNAME = "Deepika"
 ADMIN_PASSWORD = "1709"
 
-# DB connection
-DATABASE_URL = os.getenv("DATABASE_URL")
+# PostgreSQL URL from Render environment
+DATABASE_URL = os.environ.get("DATABASE_URL")
 
+
+# DB connection
 def get_connection():
     return psycopg2.connect(DATABASE_URL)
+
 
 # Create table
 def init_db():
@@ -30,25 +33,14 @@ def init_db():
 
 init_db()
 
-# Login
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        if request.form['username'] == ADMIN_USERNAME and request.form['password'] == ADMIN_PASSWORD:
-            session['admin'] = True
-            return redirect('/')
-        else:
-            return "Invalid Login"
-    return render_template("login.html")
 
-# Home
+# USER HOME PAGE (complaint form)
 @app.route('/')
 def home():
-    if not session.get('admin'):
-        return redirect('/login')
     return render_template("index.html")
 
-# Add complaint
+
+# ADD COMPLAINT
 @app.route('/add', methods=['POST'])
 def add():
     name = request.form['name']
@@ -62,25 +54,44 @@ def add():
 
     return redirect('/')
 
-# View complaints
+
+# ADMIN LOGIN
+@app.route('/admin-login', methods=['GET', 'POST'])
+def admin_login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
+            session['admin'] = True
+            return redirect('/admin')
+        else:
+            return "Invalid Login"
+
+    return render_template("login.html")
+
+
+# ADMIN DASHBOARD
 @app.route('/admin')
 def admin():
     if not session.get('admin'):
-        return redirect('/login')
+        return redirect('/admin-login')
 
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute("SELECT * FROM complaints")
+    cur.execute("SELECT * FROM complaints ORDER BY id DESC")
     data = cur.fetchall()
     conn.close()
 
     return render_template("admin.html", complaints=data)
 
-# Logout
+
+# LOGOUT
 @app.route('/logout')
 def logout():
     session.clear()
-    return redirect('/login')
+    return redirect('/admin-login')
+
 
 if __name__ == "__main__":
-    app.run()
+    app.run(host="0.0.0.0", port=5000)
