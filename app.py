@@ -5,10 +5,11 @@ import os
 app = Flask(__name__)
 app.secret_key = "mysecretkey"
 
+# Admin credentials
 ADMIN_USERNAME = "Deepika"
 ADMIN_PASSWORD = "1709"
 
-# PostgreSQL URL from Render environment
+# PostgreSQL URL (Render environment variable)
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
 
@@ -25,7 +26,8 @@ def init_db():
         CREATE TABLE IF NOT EXISTS complaints (
             id SERIAL PRIMARY KEY,
             name TEXT,
-            complaint TEXT
+            complaint TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
     conn.commit()
@@ -34,7 +36,7 @@ def init_db():
 init_db()
 
 
-# USER HOME PAGE (complaint form)
+# USER PAGE
 @app.route('/')
 def home():
     return render_template("index.html")
@@ -48,7 +50,10 @@ def add():
 
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute("INSERT INTO complaints (name, complaint) VALUES (%s, %s)", (name, complaint))
+    cur.execute(
+        "INSERT INTO complaints (name, complaint) VALUES (%s, %s)",
+        (name, complaint)
+    )
     conn.commit()
     conn.close()
 
@@ -84,6 +89,21 @@ def admin():
     conn.close()
 
     return render_template("admin.html", complaints=data)
+
+
+# DELETE COMPLAINT
+@app.route('/delete/<int:id>')
+def delete(id):
+    if not session.get('admin'):
+        return redirect('/admin-login')
+
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("DELETE FROM complaints WHERE id=%s", (id,))
+    conn.commit()
+    conn.close()
+
+    return redirect('/admin')
 
 
 # LOGOUT
