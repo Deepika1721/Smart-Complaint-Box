@@ -1,10 +1,11 @@
-<h2>📝 Smart Complaint Box</h2>
+<h2>Smart Complaint Box</h2>
 
-<a href="/logout">Logout</a> |
-<a href="/admin">View Complaints</a>
-
-<form action="/add" method="POST">
-    <input type="text" name="name" placeholder="Your Name" required><br><br>
-    <input type="text" name="complaint" placeholder="Complaint" required><br><br>
+<form action="/add" method="post">
+    <input name="name" placeholder="Your Name" required>
+    <input name="complaint" placeholder="Your Complaint" required>
     <button type="submit">Submit</button>
 </form>
+
+<br>
+
+<p>Complaint submitted will be visible to admin only.</p>
