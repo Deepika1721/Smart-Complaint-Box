@@ -7,6 +7,7 @@ app.secret_key = "mysecretkey"
 ADMIN_USERNAME = "Deepika"
 ADMIN_PASSWORD = "1709"
 
+# DB create
 def init_db():
     conn = sqlite3.connect("complaints.db")
     c = conn.cursor()
@@ -22,6 +23,7 @@ def init_db():
 
 init_db()
 
+# Login
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -36,18 +38,14 @@ def login():
 
     return render_template("login.html")
 
+# Home (Add complaint page)
 @app.route('/')
 def home():
     if not session.get('admin'):
         return redirect('/login')
+    return render_template("index.html")
 
-    conn = sqlite3.connect("complaints.db")
-    c = conn.cursor()
-    c.execute("SELECT * FROM complaints")
-    data = c.fetchall()
-    conn.close()
-    return render_template("index.html", complaints=data)
-
+# Add complaint
 @app.route('/add', methods=['POST'])
 def add():
     name = request.form['name']
@@ -61,6 +59,21 @@ def add():
 
     return redirect('/')
 
+# Admin page (View complaints)
+@app.route('/admin')
+def admin():
+    if not session.get('admin'):
+        return redirect('/login')
+
+    conn = sqlite3.connect("complaints.db")
+    c = conn.cursor()
+    c.execute("SELECT * FROM complaints")
+    data = c.fetchall()
+    conn.close()
+
+    return render_template("admin.html", complaints=data)
+
+# Logout
 @app.route('/logout')
 def logout():
     session.clear()
