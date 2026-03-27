@@ -1,10 +1,12 @@
-<h2>📊 Admin Dashboard</h2>
+<h2>Admin Dashboard - Complaints</h2>
 
-<a href="/">Back</a> |
 <a href="/logout">Logout</a>
 
-<h3>All Complaints</h3>
+<hr>
 
 {% for c in complaints %}
-    <p><b>{{c[1]}}</b>: {{c[2]}}</p>
+    <div style="border:1px solid black; padding:10px; margin:10px;">
+        <p><b>Name:</b> {{c[1]}}</p>
+        <p><b>Complaint:</b> {{c[2]}}</p>
+    </div>
 {% endfor %}
