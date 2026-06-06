@@ -4,10 +4,7 @@ A simple and effective complaint management system built using Flask and Postgre
 
 ---
 
-## 🌐 Live Demo
-https://smart-complaint-box-gr0v.onrender.com
 
----
 
 ## 🚀 Features
 
